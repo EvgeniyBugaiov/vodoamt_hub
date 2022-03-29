@@ -1,0 +1,38 @@
+---
+- hosts: vodomat_hub
+  become: true
+
+  tasks:
+    - name: Upgrade all packages
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Install requirements packages
+      yum:
+        name:
+          - epel-release
+          - python-pip
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+        state: present
+
+    - name: Add docker-ce repository
+      yum_repository:
+        name: Docker-CE
+        description: Stable Docker CE repository
+        baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
+        gpgkey: https://download.docker.com/linux/centos/gpg
+        gpgcheck: true
+    
+    - name: Install docker-ce
+      yum:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+    
+    - name: Start docker and enable it on reboot
+      service: name=docker state=started enabled=true

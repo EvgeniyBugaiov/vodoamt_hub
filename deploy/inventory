@@ -1,0 +1,2 @@
+[vodomat_hub]
+hub.roganska.com ansible_connection=ssh ansible_user=root
