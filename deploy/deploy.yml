@@ -12,8 +12,8 @@
       yum:
         name:
           - epel-release
-          - python-pip
           - yum-utils
+          - python2-pip
           - device-mapper-persistent-data
           - lvm2
         state: present
@@ -36,3 +36,25 @@
     
     - name: Start docker and enable it on reboot
       service: name=docker state=started enabled=true
+
+    # !!! To avoid error with docker python package
+    - name: Install websocket-client python package
+      pip:
+        name: websocket-client
+        version: 0.56.0
+
+    - name: Install docker python package
+      pip:
+        name: docker
+        version: 4.1.0 # For python2.7 version before 5.0.0
+
+    - name: Start gitlab-runner docker container
+      docker_container:
+        name: gitlab-runner
+        state: started
+        image: gitlab/gitlab-runner:latest
+        network_mode: host
+        restart_policy: always
+        volumes:
+          - /srv/gitlab-runner/config:/etc/gitlab-runner
+          - /var/run/docker.sock:/var/run/docker.sock
