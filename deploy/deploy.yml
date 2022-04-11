@@ -2,7 +2,17 @@
 - hosts: vodomat_hub
   become: true
 
+  vars:
+    share_uri: "{{ lookup('env', 'SHARE_URI') }}"
+    share_username: "{{ lookup('env', 'SHARE_USERNAME') }}"
+    share_password: "{{ lookup('env', 'SHARE_PASSWORD') }}"
+    share_mountpoint: "/mnt/recorder"
+
   tasks:
+    - name: Set timezone
+      timezone:
+        name: Europe/Kiev
+
     - name: Upgrade all packages
       yum:
         name: '*'
@@ -16,6 +26,7 @@
           - python2-pip
           - device-mapper-persistent-data
           - lvm2
+          - cifs-utils
         state: present
 
     - name: Add docker-ce repository
@@ -25,7 +36,7 @@
         baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
         gpgkey: https://download.docker.com/linux/centos/gpg
         gpgcheck: true
-    
+
     - name: Install docker-ce
       yum:
         name:
@@ -33,7 +44,7 @@
           - docker-ce-cli
           - containerd.io
         state: present
-    
+
     - name: Start docker and enable it on reboot
       service: name=docker state=started enabled=true
 
@@ -58,3 +69,17 @@
         volumes:
           - /srv/gitlab-runner/config:/etc/gitlab-runner
           - /var/run/docker.sock:/var/run/docker.sock
+
+    - name: Share mountpoint exist
+      file:
+        path: "{{ share_mountpoint }}"
+        state: directory
+        mode: "0755"
+
+    - name: Mount recorder share
+      mount:
+        src: "{{ share_uri }}"
+        path: "{{ share_mountpoint }}"
+        fstype: cifs
+        opts: "username={{ share_username }},password={{ share_password }}"
+        state: mounted

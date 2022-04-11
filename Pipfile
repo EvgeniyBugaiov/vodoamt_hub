@@ -10,3 +10,6 @@ ansible = "*"
 
 [requires]
 python_version = "3.9"
+
+[scripts]
+deploy = "ansible-playbook -i ./deploy/inventory ./deploy/deploy.yml"
