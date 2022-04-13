@@ -27,6 +27,8 @@
           - device-mapper-persistent-data
           - lvm2
           - cifs-utils
+          - git
+          - python3
         state: present
 
     - name: Add docker-ce repository
@@ -83,3 +85,15 @@
         fstype: cifs
         opts: "username={{ share_username }},password={{ share_password }}"
         state: mounted
+
+    - name: Clone vodomat_recorder repo
+      git:
+        repo: https://github.com/EvgeniyBugaiov/vodomat_recorder.git
+        dest: ~/vodomat_recorder
+
+    - name: Add vodomat_recorder archive script to cron
+      cron:
+        name: "Add O, Z, X reports to archives"
+        minute: "0"
+        hour: "1"
+        job: "python3 ~/vodomat_recorder/archive.py"
