@@ -7,11 +7,13 @@
     share_username: "{{ lookup('env', 'SHARE_USERNAME') }}"
     share_password: "{{ lookup('env', 'SHARE_PASSWORD') }}"
     share_mountpoint: "/mnt/recorder"
+    secret_key: "{{ lookup('env', 'SECRET_KEY')}}"
+    database_name: "{{ lookup('env', 'DATABASE_NAME')}}"
+    database_user: "{{ lookup('env', 'DATABASE_USER')}}"
+    database_password: "{{ lookup('env', 'DATABASE_PASSWORD')}}"
+    database_host: "{{ lookup('env', 'DATABASE_HOST')}}"
 
   tasks:
-    - name: Set timezone
-      timezone:
-        name: Europe/Kiev
 
     - name: Upgrade all packages
       yum:
@@ -31,6 +33,17 @@
           - python3
         state: present
 
+    - name: Set timezone
+      timezone:
+        name: Europe/Kiev
+
+    - name: Open http firewall port
+      firewalld:
+        service: http
+        immediate: yes
+        permanent: true
+        state: enabled
+
     - name: Add docker-ce repository
       yum_repository:
         name: Docker-CE
@@ -46,6 +59,12 @@
           - docker-ce-cli
           - containerd.io
         state: present
+
+    - name: Install docker-compose from official github repo
+      get_url:
+        url : https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: 'u+x,g+x'
 
     - name: Start docker and enable it on reboot
       service: name=docker state=started enabled=true
@@ -72,6 +91,7 @@
           - /srv/gitlab-runner/config:/etc/gitlab-runner
           - /var/run/docker.sock:/var/run/docker.sock
 
+# recorder ---------------------------------------------------------------------
     - name: Share mountpoint exist
       file:
         path: "{{ share_mountpoint }}"
@@ -97,3 +117,19 @@
         minute: "0"
         hour: "1"
         job: "python3 ~/vodomat_recorder/archive.py"
+
+# vodomat_server_admin ---------------------------------------------------------
+    - name: Clone vodomat_server_admin repo
+      git:
+        repo: https://github.com/EvgeniyBugaiov/vodomat_server_admin.git
+        dest: ~/vodomat_server_admin
+
+    - name: Create .env file
+      template:
+        src: .env.j2
+        dest: ~/vodomat_server_admin/.env
+
+    - name: Run vodomat_server_admin docker-compose
+      shell:
+        cmd: "docker-compose up --build -d"
+        chdir: ~/vodomat_server_admin
