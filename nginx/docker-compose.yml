@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+    nginx:
+      build: .
+      network_mode: "host"
+      volumes:
+        - vodomat_server_admin_static_volume:/app/static
+      restart: "on-failure"
+
+volumes:
+  vodomat_server_admin_static_volume:
+      external: true

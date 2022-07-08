@@ -133,3 +133,30 @@
       shell:
         cmd: "docker-compose up --build -d"
         chdir: ~/vodomat_server_admin
+
+# vodomat_api ------------------------------------------------------------------
+    - name: Clone vodomat_api repo
+      git:
+        repo: https://github.com/EvgeniyBugaiov/vodomat_api.git
+        dest: ~/vodomat_api
+
+    - name: Create .env file
+      template:
+        src: .env.j2
+        dest: ~/vodomat_api/.env
+
+    - name: Run vodomat_api docker-compose
+      shell:
+        cmd: "docker-compose up --build -d"
+        chdir: ~/vodomat_api
+
+# nginx ------------------------------------------------------------------------
+    - name: Copy nginx folder
+      copy:
+        src: "{{ playbook_dir }}/../nginx"
+        dest: ~
+
+    - name: Run nginx container
+      shell:
+        cmd: "docker-compose up --build -d"
+        chdir: ~/nginx
