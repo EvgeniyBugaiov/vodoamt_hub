@@ -92,31 +92,31 @@
           - /var/run/docker.sock:/var/run/docker.sock
 
 # recorder ---------------------------------------------------------------------
-    - name: Share mountpoint exist
-      file:
-        path: "{{ share_mountpoint }}"
-        state: directory
-        mode: "0755"
-
-    - name: Mount recorder share
-      mount:
-        src: "{{ share_uri }}"
-        path: "{{ share_mountpoint }}"
-        fstype: cifs
-        opts: "username={{ share_username }},password={{ share_password }}"
-        state: mounted
-
-    - name: Clone vodomat_recorder repo
-      git:
-        repo: https://github.com/EvgeniyBugaiov/vodomat_recorder.git
-        dest: ~/vodomat_recorder
-
-    - name: Add vodomat_recorder archive script to cron
-      cron:
-        name: "Add O, Z, X reports to archives"
-        minute: "0"
-        hour: "1"
-        job: "python3 ~/vodomat_recorder/archive.py"
+    # - name: Share mountpoint exist
+    #   file:
+    #     path: "{{ share_mountpoint }}"
+    #     state: directory
+    #     mode: "0755"
+    #
+    # - name: Mount recorder share
+    #   mount:
+    #     src: "{{ share_uri }}"
+    #     path: "{{ share_mountpoint }}"
+    #     fstype: cifs
+    #     opts: "username={{ share_username }},password={{ share_password }}"
+    #     state: mounted
+    #
+    # - name: Clone vodomat_recorder repo
+    #   git:
+    #     repo: https://github.com/EvgeniyBugaiov/vodomat_recorder.git
+    #     dest: ~/vodomat_recorder
+    #
+    # - name: Add vodomat_recorder archive script to cron
+    #   cron:
+    #     name: "Add O, Z, X reports to archives"
+    #     minute: "0"
+    #     hour: "1"
+    #     job: "python3 ~/vodomat_recorder/archive.py"
 
 # vodomat_server_admin ---------------------------------------------------------
     - name: Clone vodomat_server_admin repo
@@ -154,7 +154,7 @@
     - name: Copy nginx folder
       copy:
         src: "{{ playbook_dir }}/../nginx"
-        dest: ~
+        dest: "~"
 
     - name: Run nginx container
       shell:
