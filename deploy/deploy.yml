@@ -24,6 +24,8 @@
     payment_gateway_password: "{{ lookup('env', 'PAYMENT_GATEWAY_PASSWORD')}}"
     payment_gateway_payee_id: "{{ lookup('env', 'PAYMENT_GATEWAY_PAYEE_ID')}}"
 
+    redis_server_host: "{{ lookup('env', 'REDIS_SERVER_HOST')}}"
+
   tasks:
 
     - name: Upgrade all packages
